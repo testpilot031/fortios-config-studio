@@ -1,0 +1,113 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "FortiOS",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#config-blocks"
+    },
+    {
+      "include": "#edit-blocks"
+    },
+    {
+      "include": "#commands"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#ip-addresses"
+    },
+    {
+      "include": "#numbers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.fortios",
+          "match": "#.*$"
+        },
+        {
+          "name": "comment.line.exclamation.fortios",
+          "match": "!.*$"
+        }
+      ]
+    },
+    "config-blocks": {
+      "patterns": [
+        {
+          "name": "keyword.control.config.fortios",
+          "match": "\\b(config)\\b"
+        },
+        {
+          "name": "keyword.control.end.fortios",
+          "match": "\\b(end)\\b"
+        }
+      ]
+    },
+    "edit-blocks": {
+      "patterns": [
+        {
+          "name": "keyword.control.edit.fortios",
+          "match": "\\b(edit)\\b"
+        },
+        {
+          "name": "keyword.control.next.fortios",
+          "match": "\\b(next)\\b"
+        }
+      ]
+    },
+    "commands": {
+      "patterns": [
+        {
+          "name": "keyword.other.enable.fortios",
+          "match": "\\b(enable)\\b"
+        },
+        {
+          "name": "keyword.other.disable.fortios",
+          "match": "\\b(disable)\\b"
+        },
+        {
+          "name": "keyword.other.set.fortios",
+          "match": "\\b(set|unset|append|select|delete|move|rename|clone|show)\\b"
+        },
+        {
+          "name": "support.type.fortios",
+          "match": "\\b(system|firewall|router|vpn|user|log|report|webfilter|antivirus|ips|application|emailfilter|dlp|icap|wanopt|endpoint-control|ftp-proxy|web-proxy|explicit-proxy|ssh-filter|profile|policy|address|service|schedule|interface|zone|route|bgp|ospf|rip|multicast|authentication|ldap|radius|tacacs|certificate|crl|local-in-policy|consolidated-policy|shaping-policy|shaping-profile|traffic-shaper|per-ip-shaper)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.fortios",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.fortios",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "ip-addresses": {
+      "patterns": [
+        {
+          "name": "constant.numeric.ip.private.fortios",
+          "match": "\\b(?:10\\.(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){2}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|172\\.(?:1[6-9]|2[0-9]|3[01])\\.(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){1}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|192\\.168\\.(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){1}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(?:/(?:3[0-2]|[12]?[0-9]))?\\b"
+        },
+        {
+          "name": "constant.numeric.ip.global.fortios",
+          "match": "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:3[0-2]|[12]?[0-9]))?\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.fortios",
+      "match": "\\b\\d+\\b"
+    }
+  },
+  "scopeName": "source.fortios"
+}
