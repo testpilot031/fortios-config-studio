@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 export class FortiOSProfileDefinitionProvider implements vscode.DefinitionProvider {
-    
+
     private readonly PROFILE_PATTERNS: { [key: string]: RegExp } = {
         'av-profile': /config antivirus profile/,
         'ips-sensor': /config ips sensor/,
@@ -15,66 +15,68 @@ export class FortiOSProfileDefinitionProvider implements vscode.DefinitionProvid
         'icap-profile': /config icap profile/,
         'waf-profile': /config waf profile/,
         'profile-protocol-options': /config firewall profile-protocol-options/,
-        'schedule': /config firewall schedule/
+        'schedule': /config firewall schedule/,
+        // Proxy policy specific profiles
+        'http-profile': /config web-proxy profile/,
+        'web-proxy-profile': /config web-proxy profile/,
+        'explicit-web-proxy': /config web-proxy explicit/,
+        'web-cache': /config web-proxy url-match/
     };
 
     provideDefinition(
         document: vscode.TextDocument,
         position: vscode.Position,
         token: vscode.CancellationToken
-    ): vscode.ProviderResult<vscode.Definition | vscode.LocationLink[]> {
-        
-        const line = document.lineAt(position.line);
-        const text = line.text.trim();
-        
-        // Check if current line contains a profile reference
-        const profileReference = this.extractProfileReference(text, position.character);
-        if (!profileReference) {
+    ): vscode.ProviderResult<vscode.Definition> {
+
+        // Extract profile reference from current position
+        const profileRef = this.extractProfileReference(document, position);
+        if (!profileRef) {
             return null;
         }
 
         // Find the definition of this profile
-        const definition = this.findProfileDefinition(document, profileReference.type, profileReference.name);
-        if (!definition) {
-            return null;
-        }
-
-        return new vscode.Location(document.uri, definition);
+        const definition = this.findProfileDefinition(document, profileRef.type, profileRef.name);
+        return definition;
     }
 
-    private extractProfileReference(lineText: string, characterPosition: number): { type: string, name: string } | null {
-        // Match patterns like: set av-profile "profile_name"
-        const setMatches = lineText.match(/set\s+([a-z-]+)\s+"([^"]+)"/);
-        if (setMatches && this.PROFILE_PATTERNS[setMatches[1]]) {
-            return {
-                type: setMatches[1],
-                name: setMatches[2]
-            };
-        }
+    private extractProfileReference(document: vscode.TextDocument, position: vscode.Position): { type: string, name: string } | null {
+        const line = document.lineAt(position.line);
+        const text = line.text;
+        const character = position.character;
 
-        // Match patterns like: set av-profile profile_name (without quotes)
-        const setMatchesNoQuotes = lineText.match(/set\s+([a-z-]+)\s+([^\s]+)/);
-        if (setMatchesNoQuotes && this.PROFILE_PATTERNS[setMatchesNoQuotes[1]]) {
-            return {
-                type: setMatchesNoQuotes[1],
-                name: setMatchesNoQuotes[2]
-            };
-        }
-
-        // Check if cursor is positioned on a profile name
-        const wordRange = this.getWordAtPosition(lineText, characterPosition);
-        if (!wordRange) {
-            return null;
-        }
-
-        const word = lineText.substring(wordRange.start, wordRange.end);
-        
-        // Look for profile type in the same line
-        for (const [profileType, pattern] of Object.entries(this.PROFILE_PATTERNS)) {
-            if (lineText.includes(profileType)) {
+        // Match patterns like: set ssl-ssh-profile "certificate-inspection"
+        const quotedPattern = /set\s+([a-z-]+)\s+"([^"]+)"/g;
+        let quotedMatch;
+        while ((quotedMatch = quotedPattern.exec(text)) !== null) {
+            const profileType = quotedMatch[1];
+            const profileName = quotedMatch[2];
+            const startQuote = quotedMatch.index + quotedMatch[0].indexOf('"');
+            const endQuote = startQuote + profileName.length + 1;
+            
+            // Check if cursor is within the quoted profile name
+            if (this.PROFILE_PATTERNS[profileType] && character >= startQuote && character <= endQuote) {
                 return {
                     type: profileType,
-                    name: word.replace(/"/g, '') // Remove quotes if present
+                    name: profileName
+                };
+            }
+        }
+
+        // Match patterns like: set ssl-ssh-profile certificate-inspection (without quotes)
+        const unquotedPattern = /set\s+([a-z-]+)\s+([^\s]+)/g;
+        let unquotedMatch;
+        while ((unquotedMatch = unquotedPattern.exec(text)) !== null) {
+            const profileType = unquotedMatch[1];
+            const profileName = unquotedMatch[2];
+            const nameStart = unquotedMatch.index + unquotedMatch[0].indexOf(profileName);
+            const nameEnd = nameStart + profileName.length;
+            
+            // Check if cursor is within the profile name
+            if (this.PROFILE_PATTERNS[profileType] && character >= nameStart && character <= nameEnd) {
+                return {
+                    type: profileType,
+                    name: profileName
                 };
             }
         }
@@ -82,64 +84,66 @@ export class FortiOSProfileDefinitionProvider implements vscode.DefinitionProvid
         return null;
     }
 
-    private getWordAtPosition(text: string, position: number): { start: number, end: number } | null {
-        const before = text.slice(0, position);
-        const after = text.slice(position);
-        
-        const beforeMatch = before.match(/[\w-"]*$/);
-        const afterMatch = after.match(/^[\w-"]*/);
-        
-        if (!beforeMatch || !afterMatch) {
-            return null;
-        }
-
-        return {
-            start: position - beforeMatch[0].length,
-            end: position + afterMatch[0].length
-        };
-    }
-
-    private findProfileDefinition(document: vscode.TextDocument, profileType: string, profileName: string): vscode.Range | null {
+    private findProfileDefinition(document: vscode.TextDocument, profileType: string, profileName: string): vscode.Location | null {
         const configPattern = this.PROFILE_PATTERNS[profileType];
-        if (!configPattern) {
-            return null;
-        }
-
-        let inConfigSection = false;
-        let configStartLine = -1;
-
+        
+        // Stack-based approach to handle nested structures correctly
+        const stack: Array<{ type: 'config' | 'edit', line: number, text: string }> = [];
+        let inTargetConfigSection = false;
+        
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i);
             const text = line.text.trim();
 
-            // Check for config section start
-            if (configPattern.test(text)) {
-                inConfigSection = true;
-                configStartLine = i;
+            // Handle config statements - push to stack
+            const configMatch = text.match(/^config\s+(.+)/);
+            if (configMatch) {
+                stack.push({ type: 'config', line: i, text: text });
+                
+                // Check if this is our target config section
+                if (configPattern.test(text)) {
+                    inTargetConfigSection = true;
+                }
                 continue;
             }
 
-            // Check for config section end
-            if (inConfigSection && text === 'end') {
-                inConfigSection = false;
+            // Handle edit statements - push to stack
+            const editMatch = text.match(/^edit\s+"?([^"\s]+)"?/);
+            if (editMatch) {
+                stack.push({ type: 'edit', line: i, text: text });
+                
+                // Check if this is the profile we're looking for and we're in the right section
+                if (inTargetConfigSection && editMatch[1] === profileName) {
+                    const range = new vscode.Range(i, 0, i, text.length);
+                    return new vscode.Location(document.uri, range);
+                }
                 continue;
             }
 
-            // Look for edit blocks within the config section
-            if (inConfigSection) {
-                // Match: edit "profile_name" or edit profile_name
-                const editMatch = text.match(/^edit\s+"?([^"\s]+)"?/);
-                if (editMatch) {
-                    const editName = editMatch[1];
-                    if (editName === profileName) {
-                        return new vscode.Range(
-                            i,
-                            text.indexOf('edit'),
-                            i,
-                            text.length
-                        );
+            // Handle end statements - pop from stack if it's a config
+            if (text === 'end') {
+                if (stack.length > 0) {
+                    const lastElement = stack[stack.length - 1];
+                    if (lastElement.type === 'config') {
+                        // Check if we're leaving the target config section
+                        if (inTargetConfigSection && configPattern.test(lastElement.text)) {
+                            inTargetConfigSection = false;
+                        }
+                        stack.pop();
                     }
                 }
+                continue;
+            }
+
+            // Handle next statements - pop from stack if it's an edit
+            if (text === 'next') {
+                if (stack.length > 0) {
+                    const lastElement = stack[stack.length - 1];
+                    if (lastElement.type === 'edit') {
+                        stack.pop();
+                    }
+                }
+                continue;
             }
         }
 

@@ -94,7 +94,11 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "update-keywords": "node scripts/update-keywords.js",
+    "update-keywords-manual": "node scripts/manual-update.js",
+    "update-keywords-from-version": "node scripts/update-keywords-from-version.js",
+    "rss-monitor": "node scripts/rss-monitor.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.74.0",

@@ -114,6 +114,13 @@ Thumbs.db
 
 # IDE files  
 .vscode/
+.claude/
 
 # Test files
 test-files/
+
+# MCP Server directories
+.serena/
+
+# RSS Monitor cache file
+.fortios-versions.json

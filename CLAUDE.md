@@ -142,6 +142,29 @@ src/
     └── commands.ts                # FortiOS command definitions for completion
 ```
 
+## Keyword Maintenance
+
+### 🆕 RSS-Based Auto-Monitoring (Recommended)
+The extension now features **automatic FortiOS version detection** via RSS feed monitoring. See `KEYWORDS_UPDATE_GUIDE.md` for complete documentation.
+
+**RSS Monitor Commands:**
+- `npm run rss-monitor` - Check RSS feed for new FortiOS versions and auto-update keywords
+- `npm run update-keywords-from-version 7.6.4 7.4.8` - Update from specific versions
+- GitHub Actions runs **daily at 02:00 UTC** and creates PRs when new versions detected
+
+**Traditional Update Commands:**
+- `npm run update-keywords` - Update from predefined FortiOS documentation URLs  
+- `npm run update-keywords-manual` - Interactive manual update
+
+**RSS Source:** `https://support.fortinet.com/rss/firmware.xml`  
+**Current Keywords:** 42 keywords dynamically maintained from latest FortiOS versions in `syntaxes/fortios.tmLanguage.json:80`
+
+**Automation Benefits:**
+- ✅ Zero-maintenance keyword updates
+- ✅ New FortiOS versions detected within 24 hours  
+- ✅ Auto-generated PRs with detailed change logs
+- ✅ Fallback systems ensure reliability
+
 ## Requirements Reference
 
 The complete feature requirements are documented in `fortios-vscode-extension-requirements.md`. This includes planned features beyond the current MVP implementation such as outline views, configuration summary extraction, and completion providers.

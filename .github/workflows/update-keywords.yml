@@ -1,0 +1,188 @@
+name: Update FortiOS Keywords
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC to check for new FortiOS versions
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  rss-monitor:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Cache version history
+      uses: actions/cache@v4
+      with:
+        path: .fortios-versions.json
+        key: fortios-versions-${{ github.run_id }}
+        restore-keys: |
+          fortios-versions-
+    
+    - name: Make scripts executable
+      run: |
+        chmod +x scripts/rss-monitor.js
+        chmod +x scripts/update-keywords-from-version.js
+    
+    - name: Check for new FortiOS versions
+      id: version-check
+      run: |
+        echo "Starting RSS monitoring..."
+        node scripts/rss-monitor.js > monitor-output.log 2>&1
+        
+        if grep -q "Successfully updated keywords" monitor-output.log; then
+          echo "updated=true" >> $GITHUB_OUTPUT
+          echo "New versions found and keywords updated"
+        elif grep -q "Found.*new FortiOS version" monitor-output.log; then
+          echo "updated=partial" >> $GITHUB_OUTPUT  
+          echo "New versions found but update failed"
+        else
+          echo "updated=false" >> $GITHUB_OUTPUT
+          echo "No new versions found"
+        fi
+        
+        # Extract new versions for PR description
+        if grep -q "New versions found:" monitor-output.log; then
+          grep -A 10 "New versions found:" monitor-output.log | tail -n +2 > new-versions.txt
+        fi
+        
+        cat monitor-output.log
+    
+    - name: Check for tmLanguage changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain syntaxes/)" ]; then
+          echo "files-changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "files-changed=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create Pull Request for successful updates
+      if: steps.version-check.outputs.updated == 'true' && steps.verify-changed-files.outputs.files-changed == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: auto-update FortiOS CLI keywords from new versions'
+        title: '🆕 Auto-update FortiOS CLI Keywords from RSS Feed'
+        body: |
+          ## Summary
+          - 🤖 Automatically detected new FortiOS versions from RSS feed
+          - ✅ Successfully updated CLI configuration keywords
+          - 📝 Updated `syntaxes/fortios.tmLanguage.json` with latest config commands
+          
+          ## New Versions Detected
+          $(cat new-versions.txt 2>/dev/null || echo "See workflow logs for details")
+          
+          ## Verification
+          - [ ] Test syntax highlighting with sample FortiOS files
+          - [ ] Verify no regression in existing functionality
+          - [ ] Check extension compiles successfully
+          
+          ---
+          
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+          
+          Co-Authored-By: Claude <noreply@anthropic.com>
+        branch: auto-update-keywords-${{ github.run_id }}
+        delete-branch: true
+        
+    - name: Create issue for failed updates
+      if: steps.version-check.outputs.updated == 'partial'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          let logContent = '';
+          try {
+            logContent = fs.readFileSync('monitor-output.log', 'utf8');
+          } catch (e) {
+            logContent = 'Log file not found';
+          }
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '⚠️ FortiOS Version Update Failed',
+            body: `## Issue
+          New FortiOS versions were detected in the RSS feed, but the keyword update process failed.
+          
+          ## Action Required
+          Please manually check and update the keywords using:
+          \`\`\`bash
+          npm run update-keywords-manual
+          \`\`\`
+          
+          ## Error Log
+          \`\`\`
+          ${logContent.substring(0, 8000)}
+          \`\`\`
+          
+          ## Auto-generated
+          This issue was automatically created by the RSS monitoring workflow.
+          Run ID: ${{ github.run_id }}
+          `,
+            labels: ['maintenance', 'automated']
+          });
+
+  # Fallback job for monthly comprehensive update
+  monthly-fallback:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 1 * *' # Only on monthly schedule
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Run traditional keyword update as fallback
+      run: |
+        chmod +x scripts/update-keywords.js
+        node scripts/update-keywords.js
+    
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create Pull Request
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: monthly FortiOS CLI keywords update'
+        title: '📅 Monthly FortiOS CLI Keywords Update'
+        body: |
+          ## Summary
+          - 🗓️ Monthly fallback keyword update
+          - 📝 Updated from known FortiOS documentation sources
+          - 🔄 Updates `syntaxes/fortios.tmLanguage.json`
+          
+          ## Changes
+          - Updated FortiOS CLI configuration keywords
+          - Fetched from multiple FortiOS version documentation
+          
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+          
+          Co-Authored-By: Claude <noreply@anthropic.com>
+        branch: monthly-update-keywords-${{ github.run_id }}
+        delete-branch: true
