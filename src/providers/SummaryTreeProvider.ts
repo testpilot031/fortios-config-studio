@@ -124,10 +124,22 @@ export class FortiOSSummaryTreeProvider implements vscode.TreeDataProvider<Summa
             case 'basicInfo':
                 return [
                     new SummaryTreeItem(
+                        'Device Model',
+                        vscode.TreeItemCollapsibleState.None,
+                        summary.deviceModel,
+                        new vscode.ThemeIcon('circuit-board')
+                    ),
+                    new SummaryTreeItem(
                         'Version',
                         vscode.TreeItemCollapsibleState.None,
                         summary.version,
                         new vscode.ThemeIcon('versions')
+                    ),
+                    new SummaryTreeItem(
+                        'Build Number',
+                        vscode.TreeItemCollapsibleState.None,
+                        summary.buildno,
+                        new vscode.ThemeIcon('tools')
                     ),
                     new SummaryTreeItem(
                         'Hostname',

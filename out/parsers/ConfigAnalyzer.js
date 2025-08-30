@@ -11,6 +11,8 @@ class ConfigAnalyzer {
         const blocks = this.parser.parseDocument(document);
         return {
             version: this.extractVersion(text),
+            buildno: this.extractBuildno(text),
+            deviceModel: this.extractDeviceModel(text),
             hostname: this.extractHostname(text),
             serialNumber: this.extractSerialNumber(text),
             externalAccess: this.analyzeExternalAccess(text, blocks),
@@ -28,6 +30,14 @@ class ConfigAnalyzer {
             return versionParts ? `FortiOS ${versionParts[1]}` : version;
         }
         return 'Unknown';
+    }
+    extractBuildno(text) {
+        const buildnoMatch = text.match(/#buildno=(\d+)/);
+        return buildnoMatch ? buildnoMatch[1] : 'Unknown';
+    }
+    extractDeviceModel(text) {
+        const configVersionMatch = text.match(/#config-version=([^-]+)/);
+        return configVersionMatch ? configVersionMatch[1] : 'Unknown';
     }
     extractHostname(text) {
         const hostnameMatch = text.match(/set hostname\s+"?([^"\n]+)"?/);
@@ -113,7 +123,9 @@ class ConfigAnalyzer {
 # FortiOS Configuration Summary
 
 ## Basic Information
+- **Device Model**: ${summary.deviceModel}
 - **Version**: ${summary.version}
+- **Build Number**: ${summary.buildno}
 - **Hostname**: ${summary.hostname}
 - **Serial Number**: ${summary.serialNumber}
 

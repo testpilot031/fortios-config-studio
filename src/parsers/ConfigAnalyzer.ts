@@ -3,6 +3,8 @@ import { FortiOSParser, ConfigBlock } from './FortiOSParser';
 
 export interface ConfigSummary {
     version: string;
+    buildno: string;
+    deviceModel: string;
     hostname: string;
     serialNumber: string;
     externalAccess: {
@@ -35,6 +37,8 @@ export class ConfigAnalyzer {
 
         return {
             version: this.extractVersion(text),
+            buildno: this.extractBuildno(text),
+            deviceModel: this.extractDeviceModel(text),
             hostname: this.extractHostname(text),
             serialNumber: this.extractSerialNumber(text),
             externalAccess: this.analyzeExternalAccess(text, blocks),
@@ -53,6 +57,16 @@ export class ConfigAnalyzer {
             return versionParts ? `FortiOS ${versionParts[1]}` : version;
         }
         return 'Unknown';
+    }
+
+    private extractBuildno(text: string): string {
+        const buildnoMatch = text.match(/#buildno=(\d+)/);
+        return buildnoMatch ? buildnoMatch[1] : 'Unknown';
+    }
+
+    private extractDeviceModel(text: string): string {
+        const configVersionMatch = text.match(/#config-version=([^-]+)/);
+        return configVersionMatch ? configVersionMatch[1] : 'Unknown';
     }
 
     private extractHostname(text: string): string {
@@ -149,7 +163,9 @@ export class ConfigAnalyzer {
 # FortiOS Configuration Summary
 
 ## Basic Information
+- **Device Model**: ${summary.deviceModel}
 - **Version**: ${summary.version}
+- **Build Number**: ${summary.buildno}
 - **Hostname**: ${summary.hostname}
 - **Serial Number**: ${summary.serialNumber}
 

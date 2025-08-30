@@ -47,7 +47,7 @@
       "patterns": [
         {
           "name": "keyword.control.config.fortios",
-          "match": "\\b(config)\\b"
+          "match": "\\b(config )\\b"
         },
         {
           "name": "keyword.control.end.fortios",
@@ -79,11 +79,11 @@
         },
         {
           "name": "keyword.other.set.fortios",
-          "match": "\\b(set|unset|append|select|delete|move|rename|clone|show)\\b"
+          "match": "\\b(set)\\b"
         },
         {
           "name": "support.type.fortios",
-          "match": "\\b(alertemail|antivirus|application|authentication|automation|aws|azure|casb|certificate|diameter-filter|dlp|dnsfilter|dpdk|emailfilter|endpoint-control|ethernet-oam|extension-controller|file-filter|firewall|ftp-proxy|icap|ips|log|monitoring|nsxt|report|router|rule|sctp-filter|ssh-filter|switch-controller|system|user|videofilter|virtual-patch|voip|vpn|waf|wanopt|web-proxy|webfilter|wireless-controller)\\b"
+          "match": "(?<=^|\\s)(alertemail|antivirus|application|authentication|automation|aws|azure|casb|certificate|diameter-filter|dlp|dnsfilter|dpdk|emailfilter|endpoint-control|ethernet-oam|extension-controller|file-filter|firewall|ftp-proxy|icap|ips|log|monitoring|nsxt|report|router|rule|sctp-filter|ssh-filter|switch-controller|system|user|videofilter|virtual-patch|voip|vpn|waf|wanopt|web-proxy|webfilter|wireless-controller)(?=\\s|$)"
         }
       ]
     },
@@ -121,7 +121,7 @@
           "match": "\\b(?:8\\.8\\.8\\.8|8\\.8\\.4\\.4|1\\.1\\.1\\.1|203\\.0\\.113\\.[0-9]+|198\\.51\\.100\\.[0-9]+|93\\.184\\.216\\.[0-9]+)(?:/(?:3[0-2]|[12]?[0-9]))?\\b"
         },
         {
-          "name": "markup.italic", 
+          "name": "markup.italic",
           "match": "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:3[0-2]|[12]?[0-9]))?\\b"
         }
       ]
