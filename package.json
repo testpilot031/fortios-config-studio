@@ -2,7 +2,7 @@
   "name": "fortios-configuration-helper",
   "displayName": "FortiOS Configuration Helper",
   "description": "Enhanced syntax support and productivity features for FortiOS configuration files",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "fortios-config-studio",
   "license": "MIT",
   "homepage": "https://github.com/testpilot031/fortios-config-studio#readme",
