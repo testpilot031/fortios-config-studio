@@ -4,9 +4,19 @@
   "description": "Enhanced syntax support and productivity features for FortiOS configuration files",
   "version": "0.1.0",
   "publisher": "fortios-config-studio",
+  "license": "MIT",
+  "homepage": "https://github.com/testpilot031/fortios-config-studio#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/testpilot031/fortios-config-studio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/testpilot031/fortios-config-studio/issues"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
+  "icon": "icon.png",
   "categories": [
     "Languages",
     "Formatters"
