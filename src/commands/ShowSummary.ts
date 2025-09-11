@@ -5,7 +5,7 @@ export class ShowSummaryCommand {
     private static currentPanel: vscode.WebviewPanel | undefined;
 
     static register(context: vscode.ExtensionContext): void {
-        const disposable = vscode.commands.registerCommand('fortios.showConfigurationSummary', () => {
+        const disposable = vscode.commands.registerCommand('fortios.showConfigurationSummary', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showWarningMessage('No FortiOS configuration file is currently open.');
@@ -17,7 +17,13 @@ export class ShowSummaryCommand {
                 return;
             }
 
-            ShowSummaryCommand.createOrShow(context.extensionUri, editor.document);
+            // Focus on the FortiOS Summary view instead of opening WebView
+            try {
+                await vscode.commands.executeCommand('fortiosSummary.focus');
+            } catch (error) {
+                // Fallback to WebView if TreeView focus fails
+                ShowSummaryCommand.createOrShow(context.extensionUri, editor.document);
+            }
         });
 
         context.subscriptions.push(disposable);

@@ -5,7 +5,7 @@ const vscode = require("vscode");
 const ConfigAnalyzer_1 = require("../parsers/ConfigAnalyzer");
 class ShowSummaryCommand {
     static register(context) {
-        const disposable = vscode.commands.registerCommand('fortios.showConfigurationSummary', () => {
+        const disposable = vscode.commands.registerCommand('fortios.showConfigurationSummary', async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 vscode.window.showWarningMessage('No FortiOS configuration file is currently open.');
@@ -15,7 +15,14 @@ class ShowSummaryCommand {
                 vscode.window.showWarningMessage('Active file is not a FortiOS configuration file.');
                 return;
             }
-            ShowSummaryCommand.createOrShow(context.extensionUri, editor.document);
+            // Focus on the FortiOS Summary view instead of opening WebView
+            try {
+                await vscode.commands.executeCommand('fortiosSummary.focus');
+            }
+            catch (error) {
+                // Fallback to WebView if TreeView focus fails
+                ShowSummaryCommand.createOrShow(context.extensionUri, editor.document);
+            }
         });
         context.subscriptions.push(disposable);
     }

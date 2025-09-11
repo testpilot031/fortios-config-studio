@@ -108,6 +108,33 @@ This is a VS Code extension that provides enhanced syntax support and productivi
   - Suggests appropriate `set` commands for current section
   - Triggers on space, newline, and tab
 
+### ✅ Enhanced UI & Filtering - COMPLETED (v0.1.3)
+
+#### 3. TreeView UI Migration - COMPLETED
+- ✅ **Dedicated Sidebar**: FortiOS Explorer with 🛡️ shield icon in Activity Bar
+- ✅ **Configuration Outline**: `OutlineTreeProvider.ts` - Hierarchical tree view with click-to-jump
+- ✅ **Configuration Summary**: Integrated TreeView alongside outline
+- ✅ **Jump Navigation**: Click outline items to navigate to configuration sections
+
+#### 4. Advanced Filtering System - COMPLETED
+- ✅ **Smart Filter Detection**: `OutlineTreeProvider.ts` - Auto-detects text vs regex patterns
+- ✅ **Regex Support**: Full regular expression filtering with `(policy|firewall)` patterns
+- ✅ **Filter History**: `FilterHistory.ts` - Persistent storage of recent searches (15 items)
+- ✅ **Preset Filters**: 8 built-in FortiOS-specific filter presets:
+  - 🔧 System Configuration (`system`)
+  - 🔌 Network Interfaces (`interface`) 
+  - 🛡️ Security Policies (`(policy|firewall)`)
+  - 🛣️ Routing Configuration (`(router|route)`)
+  - 👥 User & Authentication (`(user|ldap|radius|saml)`)
+  - 🔒 VPN Settings (`(vpn|ipsec|ssl)`)
+  - 📋 Logging Configuration (`(log|syslog)`)
+  - 🛡️ Web Filter & Security (`(webfilter|antivirus|ips)`)
+- ✅ **QuickPick UI**: Interactive filter selection with presets and history
+- ✅ **Multiple Filter Commands**:
+  - `fortios.filterOutline` - Text input with history suggestions
+  - `fortios.quickFilter` - QuickPick with presets and history
+  - `fortios.clearOutlineFilter` - Clear all active filters
+
 ### Key Architecture Decisions
 
 **Dynamic Analysis Approach**: 
@@ -130,7 +157,9 @@ src/
 ├── providers/
 │   ├── FoldingRangeProvider.ts     # Code folding functionality
 │   ├── BracketMatchingProvider.ts  # Keyword highlighting
-│   ├── DocumentSymbolProvider.ts  # Outline tree structure
+│   ├── DocumentSymbolProvider.ts  # Outline tree structure (standard VS Code)
+│   ├── OutlineTreeProvider.ts     # FortiOS TreeView with advanced filtering
+│   ├── SummaryTreeProvider.ts     # Configuration summary TreeView
 │   └── CompletionItemProvider.ts  # Context-aware autocompletion
 ├── parsers/
 │   ├── FortiOSParser.ts           # Dynamic config parsing with nested support
@@ -138,6 +167,8 @@ src/
 ├── commands/
 │   ├── CommentToggle.ts           # Comment toggle functionality
 │   └── ShowSummary.ts             # Configuration summary display
+├── utils/
+│   └── FilterHistory.ts           # Filter history and preset management
 └── data/
     └── commands.ts                # FortiOS command definitions for completion
 ```

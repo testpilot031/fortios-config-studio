@@ -2,7 +2,7 @@
   "name": "fortios-configuration-helper",
   "displayName": "FortiOS Configuration Helper",
   "description": "Enhanced syntax support and productivity features for FortiOS configuration files",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "fortios-config-studio",
   "license": "MIT",
   "homepage": "https://github.com/testpilot031/fortios-config-studio#readme",
@@ -69,13 +69,53 @@
         "command": "fortios.refreshSummary",
         "title": "Refresh Summary",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "fortios.refreshOutline",
+        "title": "Refresh Outline",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "fortios.jumpToLine",
+        "title": "Jump to Configuration",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "fortios.filterOutline",
+        "title": "Filter Configuration Outline",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "fortios.clearOutlineFilter",
+        "title": "Clear Filter",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "fortios.quickFilter",
+        "title": "Quick Filter",
+        "icon": "$(search)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "fortiosExplorer",
+          "title": "FortiOS Configuration",
+          "icon": "$(shield)"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "fortiosExplorer": [
+        {
+          "id": "fortiosOutline",
+          "name": "Configuration Outline",
+          "when": "resourceExtname == .conf || resourceExtname == .cfg",
+          "canSelectMany": false
+        },
         {
           "id": "fortiosSummary",
-          "name": "FortiOS Summary",
+          "name": "Configuration Summary",
           "when": "resourceExtname == .conf || resourceExtname == .cfg"
         }
       ]
@@ -85,6 +125,33 @@
         {
           "command": "fortios.refreshSummary",
           "when": "view == fortiosSummary",
+          "group": "navigation"
+        },
+        {
+          "command": "fortios.refreshOutline",
+          "when": "view == fortiosOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "fortios.filterOutline",
+          "when": "view == fortiosOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "fortios.clearOutlineFilter",
+          "when": "view == fortiosOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "fortios.quickFilter",
+          "when": "view == fortiosOutline",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "fortios.jumpToLine",
+          "when": "view == fortiosOutline && viewItem == configBlock",
           "group": "navigation"
         }
       ]

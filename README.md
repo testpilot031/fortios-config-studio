@@ -1,7 +1,7 @@
 # FortiOS Configuration Helper
 
 ![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)
-![Version](https://img.shields.io/badge/version-0.1.0-green)
+![Version](https://img.shields.io/badge/version-0.1.3-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 Enhanced syntax support and productivity features for FortiOS configuration files in Visual Studio Code.
@@ -17,7 +17,8 @@ Enhanced syntax support and productivity features for FortiOS configuration file
 ### 📁 Code Structure & Navigation
 - **Code Folding** - Collapse/expand `config`/`end` and `edit`/`next` blocks
 - **Bracket Matching** - Highlights matching FortiOS keywords when clicked
-- **Document Outline** - Hierarchical tree view of configuration sections in Explorer
+- **Document Outline** - Hierarchical tree view of configuration sections in dedicated sidebar
+- **Advanced Filtering** - Smart filter with regex support, presets, and search history
 - **Go to Definition** - Jump to profile definitions from references
 - **Find All References** - Locate all usages of security profiles
 
@@ -43,7 +44,11 @@ Enhanced syntax support and productivity features for FortiOS configuration file
 ### Usage
 1. Open any `.conf` or `.cfg` file
 2. The extension automatically activates for FortiOS configuration files
-3. Enjoy enhanced syntax highlighting and productivity features!
+3. **Click the 🛡️ FortiOS Explorer icon** in the left activity bar to access advanced features:
+   - Configuration Outline with smart filtering
+   - Configuration Summary with risk analysis
+   - Filter presets and search history
+4. Enjoy enhanced syntax highlighting and productivity features!
 
 ## 📋 Supported File Types
 - `.conf` - FortiOS configuration files
@@ -55,7 +60,11 @@ Enhanced syntax support and productivity features for FortiOS configuration file
 |---------|----------|-------------|
 | `FortiOS: Toggle Comment` | `Ctrl/Cmd + /` | Toggle line/block comments |
 | `FortiOS: Show Configuration Summary` | Command Palette | Display configuration overview |
+| `FortiOS: Filter Configuration Outline` | - | Filter outline with search history |
+| `FortiOS: Quick Filter` | - | Filter using presets and history |
+| `FortiOS: Clear Filter` | - | Remove all filters |
 | `FortiOS: Refresh Summary` | - | Update summary panel |
+| `FortiOS: Refresh Outline` | - | Update configuration outline |
 
 ## 📖 Features in Detail
 
@@ -71,14 +80,43 @@ config firewall policy ⏵
 end
 ```
 
-### Document Outline
-Navigate large configurations easily with the hierarchical outline in Explorer:
+### FortiOS Explorer & Advanced Filtering
+
+**Dedicated FortiOS Sidebar**: 
+1. Open a FortiOS configuration file (`.conf` or `.cfg`)
+2. **Look for the 🛡️ shield icon in the left activity bar**
+3. **Click the FortiOS Explorer icon** to reveal specialized configuration management tools
+
+**Configuration Outline with Advanced Filtering**:
+Navigate large configurations with powerful filtering capabilities:
 - 🔧 System Configuration
   - Global Settings
-  - Interface Configuration
+  - Interface Configuration  
 - 🛡️ Security Policies
   - Firewall Policies
   - Security Profiles
+
+**Smart Filter Features**:
+- **Text Search** - Simple keyword filtering (`system`, `interface`, `policy`)
+- **Regex Support** - Advanced patterns like `(policy|firewall)` or `port[0-9]+`
+- **Filter Presets** - One-click filters for common configuration types:
+  - 🔧 System Configuration
+  - 🔌 Network Interfaces  
+  - 🛡️ Security Policies
+  - 🛣️ Routing Configuration
+  - 👥 User & Authentication
+  - 🔒 VPN Settings
+  - 📋 Logging Configuration
+  - 🛡️ Web Filter & Security
+- **Search History** - Remembers your recent searches (up to 15)
+- **Quick Filter UI** - Dropdown with presets and history for fast access
+
+**Filter Usage**:
+```
+🔍 Filter: Enter text or select from history
+🔎 Quick Filter: Choose preset or recent search  
+🗑️ Clear: Remove active filters
+```
 
 ### Smart Completion
 Context-aware suggestions based on your current configuration section:
